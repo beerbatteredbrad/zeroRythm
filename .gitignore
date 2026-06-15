@@ -1,0 +1,14 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# Logs / temp verification artifacts
+*.log
+_*.png
+_*.html
+
+# NOTE: assets/audio/*.mp3 are intentionally committed (kept by request).

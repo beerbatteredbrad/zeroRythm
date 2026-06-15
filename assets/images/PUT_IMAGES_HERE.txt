@@ -1,0 +1,11 @@
+Optional character/trophy images go in this folder. The game works without
+them (it draws shapes instead), but if you add these exact filenames they will
+be used automatically:
+
+  alcor_subaru.png         (the player)
+  subaru.png               (Stage 1 boss)
+  angry_subaru.png         (Stage 2 boss)
+  aura_monster_subaru.png  (Stage 3 boss)
+  trophy.png               (final win screen)
+
+Recommended size: roughly 200 x 240 px, transparent PNG.

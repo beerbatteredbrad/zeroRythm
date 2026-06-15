@@ -1,0 +1,9 @@
+Optional music goes in this folder. The game is fully playable without it
+(all timing comes from the JavaScript clock). If you add these exact filenames
+they will be played during each stage:
+
+  song1.mp3   (Stage 1 - Subaru)
+  song2.mp3   (Stage 2 - Angry Subaru)
+  song3.mp3   (Stage 3 - Aura Monster Subaru)
+
+Tip: the note charts in ../../charts/ are timed for ~48-56 second songs.

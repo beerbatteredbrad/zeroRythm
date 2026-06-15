@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Return by Rhythm — Re:Zero Rhythm Fighter</title>
+  <!-- All styling lives in style.css so it is easy to edit. -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!--
+    ============================================================
+    RETURN BY RHYTHM
+    A Friday Night Funkin'-style rhythm fighting game.
+    Personal/student project. Re:Zero-INSPIRED theme drawn with
+    original shapes & effects (no copyrighted art/audio bundled).
+
+    HOW IT IS BUILT
+    - Each "screen" below is a <section class="screen">. Only the
+      one with the extra class "active" is visible (see style.css).
+    - The actual battle (scrolling notes + characters) is drawn on
+      a single <canvas>. Everything else is plain HTML/CSS.
+    - All game logic is in script.js (heavily commented).
+    ============================================================
+  -->
+  <div id="game">
+
+    <!-- ============ 1. LOADING SCREEN ============ -->
+    <!-- Dark, dramatic, anime-inspired. Magic circle + snow + aura. -->
+    <section id="screen-loading" class="screen active">
+      <div class="aura-bg"></div>
+      <div id="snow-layer" class="snow-layer"></div>
+      <div class="magic-circle">
+        <div class="ring ring-outer"></div>
+        <div class="ring ring-mid"></div>
+        <div class="ring ring-inner"></div>
+        <div class="rune-core"></div>
+      </div>
+      <div class="loading-content">
+        <h1 class="title-glow">Return by Rhythm</h1>
+        <p class="subtitle">A Re:Zero-inspired rhythm battle</p>
+        <div class="loading-bar"><div id="loading-bar-fill" class="loading-bar-fill"></div></div>
+        <button id="btn-loading-start" class="btn btn-ghost" disabled>Loading…</button>
+      </div>
+    </section>
+
+    <!-- ============ 2. MAIN MENU ============ -->
+    <section id="screen-menu" class="screen">
+      <div class="aura-bg"></div>
+      <div class="menu-panel">
+        <h1 class="title-glow">Return by Rhythm</h1>
+        <p class="subtitle">Play as <strong>Alcor Subaru</strong></p>
+        <div class="menu-buttons">
+          <button id="btn-play" class="btn btn-primary">Start</button>
+          <button id="btn-howto" class="btn">How To Play</button>
+          <button id="btn-quit" class="btn btn-ghost">Quit</button>
+        </div>
+        <div id="howto-box" class="howto-box hidden">
+          <h3>How To Play</h3>
+          <p>Notes fall toward the four lanes at the bottom. Press the matching
+             arrow key when a note reaches its lane target:</p>
+          <p class="keys-row">
+            <span class="key">◄ Left</span>
+            <span class="key">▼ Down</span>
+            <span class="key">▲ Up</span>
+            <span class="key">► Right</span>
+          </p>
+          <p>Hit notes to damage the boss and build combo. Miss notes and you
+             lose health. Survive the song to win the stage!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 3. DIFFICULTY SELECTION ============ -->
+    <section id="screen-difficulty" class="screen">
+      <div class="aura-bg"></div>
+      <div class="menu-panel">
+        <h2 class="title-glow">Choose Difficulty</h2>
+        <div class="menu-buttons">
+          <button class="btn btn-diff" data-diff="easy">
+            <span class="diff-name">Easy</span>
+            <span class="diff-desc">Fewer notes · forgiving timing</span>
+          </button>
+          <button class="btn btn-diff" data-diff="medium">
+            <span class="diff-name">Medium</span>
+            <span class="diff-desc">Balanced challenge</span>
+          </button>
+          <button class="btn btn-diff" data-diff="hard">
+            <span class="diff-name">Hard</span>
+            <span class="diff-desc">Many notes · fast · strict</span>
+          </button>
+        </div>
+        <button id="btn-diff-back" class="btn btn-ghost">Back</button>
+      </div>
+    </section>
+
+    <!-- ============ 4. STAGE INTRO ============ -->
+    <section id="screen-intro" class="screen">
+      <div class="aura-bg"></div>
+      <div class="intro-panel">
+        <p id="intro-stage-label" class="intro-stage-label">Stage 1</p>
+        <h1 id="intro-boss-name" class="title-glow intro-boss-name">Subaru</h1>
+        <p id="intro-tagline" class="subtitle"></p>
+        <div id="intro-portrait" class="intro-portrait"></div>
+        <button id="btn-intro-start" class="btn btn-primary">Begin Battle</button>
+      </div>
+    </section>
+
+    <!-- ============ 5. BATTLE (GAMEPLAY) ============ -->
+    <section id="screen-play" class="screen">
+      <!-- The battle is rendered here. The internal resolution is fixed
+           (see CONFIG in script.js); CSS scales it to fit the window. -->
+      <canvas id="battle-canvas" width="960" height="600"></canvas>
+
+      <!-- HUD overlays the canvas (plain HTML so it is easy to restyle). -->
+      <div id="hud">
+        <!-- Top group: stage/score + the boss bar, kept together at the top
+             (so the boss bar no longer floats in the middle of the screen). -->
+        <div class="hud-topgroup">
+          <div class="hud-top">
+            <div class="hud-left">
+              <div class="hud-stage" id="hud-stage">Stage 1 — Subaru</div>
+              <div class="hud-diff" id="hud-diff">Medium</div>
+            </div>
+            <div class="hud-score-box">
+              <div class="hud-score">Score <span id="hud-score">0</span></div>
+              <div class="hud-combo" id="hud-combo">0 combo</div>
+            </div>
+          </div>
+
+          <!-- Boss health bar (top) -->
+          <div class="bar-wrap boss-bar-wrap">
+            <span class="bar-label" id="boss-bar-label">Boss</span>
+            <div class="bar-track"><div id="boss-hp-fill" class="bar-fill boss-hp-fill"></div></div>
+          </div>
+        </div>
+
+        <!-- Center rating popup (Perfect / Good / Miss) -->
+        <div id="rating-popup" class="rating-popup"></div>
+        <!-- Count-in (3..2..1) -->
+        <div id="countin" class="countin"></div>
+
+        <!-- Player health bar + song progress (bottom) -->
+        <div class="hud-bottom">
+          <div class="bar-wrap player-bar-wrap">
+            <span class="bar-label">Alcor Subaru</span>
+            <div class="bar-track"><div id="player-hp-fill" class="bar-fill player-hp-fill"></div></div>
+          </div>
+          <div class="progress-wrap">
+            <div class="bar-track"><div id="song-progress-fill" class="bar-fill song-progress-fill"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 6. STAGE CLEAR ============ -->
+    <section id="screen-clear" class="screen">
+      <div class="aura-bg"></div>
+      <div class="result-panel">
+        <h1 class="title-glow result-good">Stage Clear!</h1>
+        <p id="clear-boss-line" class="subtitle"></p>
+        <ul class="result-stats">
+          <li>Score <span id="clear-score">0</span></li>
+          <li>Max Combo <span id="clear-combo">0</span></li>
+          <li>Perfect <span id="clear-perfect">0</span></li>
+          <li>Good <span id="clear-good">0</span></li>
+          <li>Miss <span id="clear-miss">0</span></li>
+          <li>Accuracy <span id="clear-accuracy">0%</span></li>
+        </ul>
+        <button id="btn-clear-next" class="btn btn-primary">Next Stage</button>
+      </div>
+    </section>
+
+    <!-- ============ 7. GAME OVER ============ -->
+    <section id="screen-gameover" class="screen">
+      <div class="aura-bg gameover-aura"></div>
+      <div class="result-panel">
+        <h1 class="title-glow result-bad">Game Over</h1>
+        <p class="subtitle">"If it's going to be like this... let's start from the beginning."</p>
+        <div class="menu-buttons">
+          <button id="btn-retry" class="btn btn-primary">Retry Stage</button>
+          <button id="btn-gameover-menu" class="btn btn-ghost">Main Menu</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 8. FINAL WIN / TROPHY ============ -->
+    <section id="screen-win" class="screen">
+      <div class="aura-bg win-aura"></div>
+      <div id="win-snow" class="snow-layer"></div>
+      <div class="result-panel">
+        <h1 class="title-glow">You Returned by Rhythm!</h1>
+        <p class="subtitle">All three phases defeated. Subaru is at peace.</p>
+        <div class="trophy-wrap">
+          <!-- Tries the PNG first; if it fails, the CSS trophy shows instead. -->
+          <img id="trophy-img" class="trophy-img" src="assets/images/trophy.png" alt="Trophy" />
+          <div id="trophy-fallback" class="trophy-fallback">
+            <div class="trophy-cup"></div>
+            <div class="trophy-stem"></div>
+            <div class="trophy-base"></div>
+          </div>
+        </div>
+        <button id="btn-win-menu" class="btn btn-primary">Main Menu</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Optional music. If the .mp3 files do not exist the game still runs;
+       all timing comes from the JavaScript clock, not from the audio. -->
+  <audio id="audio-song" preload="none"></audio>
+
+  <!-- All game code. Plain script (NOT a module) so CodeHS can run it. -->
+  <script src="script.js"></script>
+</body>
+</html>
