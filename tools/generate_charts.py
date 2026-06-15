@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-generate_charts.py  —  OPTIONAL chart generator for "Return by Rhythm".
+generate_charts.py  —  OPTIONAL *simple* chart generator for "Return by Rhythm".
+
+NOTE: The charts that ship with the game are SYNCED TO THE REAL SONGS by
+tools/analyze_audio.py (it detects the tempo/beats of the mp3s). Use that one
+to keep the notes on beat. THIS script only makes simple placeholder charts
+from a made-up BPM, for when you have no audio to analyse.
 
 WHAT THIS DOES
 --------------

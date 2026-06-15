@@ -10,5 +10,8 @@ desktop.ini
 *.log
 _*.png
 _*.html
+# analyzer scratch outputs (regenerate with tools/analyze_audio.py)
+tools/_detected.json
+tools/_embedded_charts.js
 
 # NOTE: assets/audio/*.mp3 are intentionally committed (kept by request).
